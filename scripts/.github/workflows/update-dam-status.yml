@@ -1,0 +1,22 @@
+name: Update dam status
+
+on:
+  schedule:
+    # ทุก 3 ชั่วโมง (เวลา UTC) — ข้อมูลเขื่อนของ RID อัปเดตเป็นรายวันอยู่แล้ว
+    # ความถี่นี้เผื่อไว้สำหรับกรณีข้อมูลของ "วันนี้" ยังไม่ขึ้นตอนเช้า
+    - cron: "0 */3 * * *"
+  workflow_dispatch: {} # ปุ่มกดรันเองได้จากแท็บ Actions (ใช้ตอนทดสอบครั้งแรก)
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Fetch RID dam data and save to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/update-dam-status.mjs
