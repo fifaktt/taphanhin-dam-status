@@ -57,13 +57,17 @@ async function supabaseRest(path, opts = {}) {
       ...(opts.headers || {}),
     },
   });
+  const text = await res.text().catch(() => "");
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
     throw new Error(`Supabase REST ${path} -> HTTP ${res.status}: ${text.slice(0, 300)}`);
   }
-  return res.status === 204 ? null : res.json();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
-
 async function main() {
   // 1) อ่านรายชื่อเขื่อนที่ผู้ดูแลตั้งค่าไว้
   const tracked = await supabaseRest("dam_stations?select=rid_dam_id,name");
